@@ -1,0 +1,7 @@
+.index-field {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    width: 30%;
+    margin: 50% auto;
+}

@@ -1,0 +1,18 @@
+{% extends "myapp/base.html" %}
+
+{% block header-title %}
+アイコン変更
+{% endblock header-title %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    <form action="{% url 'signup_view' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="変更">
+    </form>
+</form>
+{% endblock content %}
+
+
+

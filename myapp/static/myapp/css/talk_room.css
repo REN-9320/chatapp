@@ -1,0 +1,65 @@
+
+.talk-header {
+    display: flex;
+}
+
+.talk-back-icon a {
+    color: #b3b3b3;
+}
+
+.talk-receivername {
+    margin: 0 auto;
+}
+
+.talk-renew {
+    border: solid 1px #b3b3b3;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.talk-renew a {
+    color: #b3b3b3;
+}
+
+.talk-sender {
+    margin-left: 5px;
+}
+
+.talk-detail {
+    display: flex;
+    position: relative;
+    margin-left: 5px;
+}
+
+.talk-content {
+    width: 80%;
+}
+
+.talk-created_at {
+    position: absolute;
+    right: 10px;
+    bottom: 2px;
+}
+
+.talk-empty {
+    padding: 5%;
+}
+
+.talk-form {
+    width: 100%;
+    text-align: center;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    background-color: #ebebeb;
+    position: fixed;
+    bottom: 0;
+}
+
+.talk-form input {
+    border-radius: 10px;
+    width: 70%;
+}
+
+.talk-form button {
+    border-radius: 10px;
+}

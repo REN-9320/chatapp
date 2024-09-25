@@ -1,0 +1,15 @@
+{% extends "myapp/base.html" %}
+
+{% block header-title %}
+ユーザー名変更
+{% endblock header-title %}
+
+{% block content %}
+<form action="{% url 'username_update' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="変更">
+</form>
+{% endblock content %}
+
+

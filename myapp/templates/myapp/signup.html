@@ -1,1 +1,29 @@
-SU
+
+{% extends "myapp/base.html" %}
+    {% block header-title %}
+        会員登録
+    {% endblock header-title %}
+    {% block content %}
+        <form method="post" enctype="multipart/form-data">
+            <form action="{% url 'signup_view' %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Submit" class="submit-btn">
+            </form>
+        </form>
+        {% if form.errors %}
+        <ul>
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+        </ul>
+        {% endif %}
+    {% endblock %}
+
+    {% block footer %}
+    {% endblock footer %}
+    

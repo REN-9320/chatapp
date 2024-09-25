@@ -1,0 +1,39 @@
+a {
+    color: black;
+    text-decoration: none;
+}
+
+.friend-box {
+    display: flex;
+    width: 100%;
+}
+
+.friend-text {
+    margin-left: 5%;
+    width: 80%;
+}
+
+.friend-text-name {
+    font-size: large;
+    margin-bottom: 3%;
+}
+
+.friend-text-chat {
+    font-size: smaller;
+}
+
+.friend-chat-content {
+    width: 80%;
+    margin-right: 2%;
+}
+
+.friend-icon img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;  
+    border: solid 3px;
+}
+
+.friend-text-chat {
+    display: flex;
+}

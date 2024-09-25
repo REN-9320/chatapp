@@ -1,0 +1,14 @@
+{% extends "myapp/base.html" %}
+
+{% block header-title %}
+メールアドレス変更
+{% endblock header-title %}
+
+{% block content %}
+<form action="{% url 'email_update' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="変更">
+</form>
+{% endblock content %}
+

@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from . import forms
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.utils import timezone
+from django.utils import timezone as dj_timezone
+from datetime import datetime, timezone
 
 def index(request):
     return render(request, "myapp/index.html")
@@ -49,29 +50,29 @@ def friends(request):
     else:
         searchForm = SearchForm() 
         other_users = CustomUser.objects.exclude(id=current_user.id)
-        
     latest_chats = []
     users_chats_list = []  
 
     for other_user in other_users:
-            chats = Chat.objects.filter(sender__in=[current_user.id, other_user.id], receiver__in=[current_user.id, other_user.id])
+            chats = Chat.objects.filter(sender__in=[current_user, other_user], receiver__in=[current_user, other_user])
             
             if chats.count() != 0:
                 latest_chat = chats.latest("created_at")
                 latest_chats.append(latest_chat)
                 
             else:
-                latest_chat = Chat(sender=current_user, receiver=CustomUser(id=other_user.id), created_at=None, content="まだトークしていません")
+                latest_chat = Chat(sender=current_user, receiver=other_user, created_at=None, content="まだトークしていません")
                 latest_chats.append(latest_chat)
-            
-    sorted_chats = sorted(latest_chats, key=lambda x: x.created_at or "", reverse=True)
-     
+                
+    min_datetime = datetime.min.replace(tzinfo=timezone.utc)
+    sorted_chats = sorted(latest_chats, key=lambda x: x.created_at or min_datetime, reverse=True)
     for chat in sorted_chats:
+        
         if chat.sender == current_user:
             user = chat.receiver
         else:
             user = chat.sender
-            
+        
         user_chat_dict = {
             'user':user,
             'chat':chat
@@ -90,7 +91,7 @@ def talk_room(request, pk):
     current_user = request.user
     
     if request.method == 'POST':
-        chat = Chat(sender=current_user, receiver=receiver, content=request.POST['content'], created_at=timezone.localtime(timezone.now()))
+        chat = Chat(sender=current_user, receiver=receiver, content=request.POST['content'], created_at=dj_timezone.now())
         if chat.content:
             chat.save()
             return redirect('talk_room', pk=receiver.id)

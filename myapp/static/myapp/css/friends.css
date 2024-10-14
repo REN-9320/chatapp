@@ -37,3 +37,7 @@ a {
 .friend-text-chat {
     display: flex;
 }
+
+.search_form {
+    display: flex;
+}

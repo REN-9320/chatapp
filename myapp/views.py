@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from .forms import SignupForm, ChangeUsernameForm, ChangeEmailForm, ChangeImageForm, PasswordChangeForm
+from .forms import SignupForm, ChangeUsernameForm, ChangeEmailForm, ChangeImageForm, PasswordChangeForm, SearchForm
 from django.contrib.auth import login
 from .models import CustomUser, Chat
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView
@@ -40,11 +40,19 @@ class LiginView(LoginView):
 @login_required
 def friends(request):
     current_user = request.user
-    other_users = CustomUser.objects.exclude(id=current_user.id)
+    searchForm = SearchForm(request.GET)
+    
+    if searchForm.is_valid():
+        keyword = searchForm.cleaned_data['keyword'] 
+        other_users = CustomUser.objects.exclude(id=current_user.id)
+        other_users = other_users.filter(username__contains=keyword) 
+    else:
+        searchForm = SearchForm() 
+        other_users = CustomUser.objects.exclude(id=current_user.id)
+        
     latest_chats = []
     users_chats_list = []  
-    other_users_number = other_users.count()
-    
+
     for other_user in other_users:
             chats = Chat.objects.filter(sender__in=[current_user.id, other_user.id], receiver__in=[current_user.id, other_user.id])
             
@@ -54,8 +62,16 @@ def friends(request):
                 
             else:
                 latest_chat = Chat(sender=current_user, receiver=CustomUser(id=other_user.id), created_at=None, content="まだトークしていません")
-                latest_chats.append(latest_chat)  
-    for user, chat in zip(other_users, latest_chats):
+                latest_chats.append(latest_chat)
+            
+    sorted_chats = sorted(latest_chats, key=lambda x: x.created_at or "", reverse=True)
+     
+    for chat in sorted_chats:
+        if chat.sender == current_user:
+            user = chat.receiver
+        else:
+            user = chat.sender
+            
         user_chat_dict = {
             'user':user,
             'chat':chat
@@ -64,8 +80,8 @@ def friends(request):
         
     context = {
         'users_chats_list':users_chats_list,
+        'searchForm': searchForm,
     }
-    
     return render(request, "myapp/friends.html", context)
 
 @login_required

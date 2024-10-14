@@ -62,3 +62,6 @@ class PasswordChangeForm(PasswordChangeForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+            
+class SearchForm(forms.Form):
+        keyword = forms.CharField(label='', max_length=50)

@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class CustomUser(AbstractUser):
-    image = models.ImageField()
+    image = models.ImageField(null=True, blank=True)
     
 class Chat(models.Model):
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="sender")

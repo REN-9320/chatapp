@@ -10,7 +10,7 @@
     <a href="{% url 'email_update' %}" class="btn">メールアドレス変更</a>
     <a href="{% url 'image_update' %}" class="btn">アイコン変更</a>
     <a href="{% url 'password_update' %}" class="btn">パスワード変更</a>
-    <form method="post" action="{% url 'logout' %}">
+    <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
         <button type="submit" method="get" class="btn-logout">ログアウト</button>
     </form>

@@ -4,6 +4,13 @@
 {% endblock header-title %}
 
 {% block content %}
+
+<form action='{% url "friends" %}' method="get" class="search_form">
+    {{ searchForm }}
+    <button type="submit">検索</button>
+    <a href='{% url "friends" %}'>クリア</a>
+</form>
+
 {% for dict in users_chats_list %}
 <a href="{% url 'talk_room' dict.user.pk %}">
     <div class="friend-box">

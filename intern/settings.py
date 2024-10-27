@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'allauth', 
     'allauth.account', 
     'allauth.socialaccount', 
+    "debug_toolbar",
 ]
 
 SITE_ID = 1
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "allauth.account.middleware.AccountMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'intern.urls'
@@ -157,6 +159,10 @@ LOGIN_REDIRECT_URL = 'friends' # ログイン後のリダイレクト先
 ACCOUNT_LOGOUT_REDIRECT_URL = 'index' #　ログアウト後のリダイレクト先
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 if os.path.isfile('.env'): 
     env = environ.Env(DEBUG=(bool, False))

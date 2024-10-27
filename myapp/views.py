@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView,
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from . import forms
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.urls import reverse_lazy
 from django.utils import timezone as dj_timezone
 from datetime import datetime, timezone
@@ -46,13 +46,75 @@ def friends(request):
     if searchForm.is_valid():
         keyword = searchForm.cleaned_data['keyword'] 
         other_users = CustomUser.objects.exclude(id=current_user.id)
-        other_users = other_users.filter(username__contains=keyword) 
+        other_users = other_users.filter(Q(username__icontains=keyword) | Q(email__contains=keyword))
     else:
         searchForm = SearchForm() 
         other_users = CustomUser.objects.exclude(id=current_user.id)
-    latest_chats = []
     users_chats_list = []  
+    
 
+    latest_chats = (
+        Chat.objects.filter(
+            Q(sender=current_user) | Q(receiver=current_user)
+        )
+        .values('sender', 'receiver')
+        .annotate(latest_time=Max('created_at'))  # 最新のチャット日時を取得
+    )
+
+    # 2. 最新チャットを辞書に整理してキャッシュ
+    latest_chat_dict = {
+        (chat['sender'], chat['receiver']): chat['latest_time']
+        for chat in latest_chats
+    }
+
+    # 3. 他のユーザーに対して、最新のチャットを取得
+    for other_user in other_users:
+        chat_key = (current_user.id, other_user.id)
+        reverse_key = (other_user.id, current_user.id)
+
+        # 最新のチャットがあるか確認
+        latest_time = latest_chat_dict.get(chat_key) or latest_chat_dict.get(reverse_key)
+
+        if latest_time:
+            # 最新チャットを取得
+            latest_chat = (
+                Chat.objects.filter(
+                    Q(sender=current_user, receiver=other_user) |
+                    Q(sender=other_user, receiver=current_user)
+                )
+                .latest('created_at')
+            )
+        else:
+            # チャットがない場合の仮オブジェクト
+            latest_chat = Chat(
+                sender=current_user,
+                receiver=other_user,
+                created_at=None,
+                content="まだトークしていません"
+            )
+
+        # 4. ユーザーとチャットのペアをリストに追加
+        user_chat_dict = {
+            'user': other_user,
+            'chat': latest_chat
+        }
+        users_chats_list.append(user_chat_dict)
+
+    # 5. 最新チャットでソート
+    sorted_chats = sorted(
+        users_chats_list,
+        key=lambda x: x['chat'].created_at or datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True
+    )
+
+    # 6. コンテキストに追加してテンプレートへ
+    context = {
+        'users_chats_list': sorted_chats,
+        'searchForm': searchForm,
+    }
+    return render(request, "myapp/friends.html", context)
+
+"""
     for other_user in other_users:
             chats = Chat.objects.filter(sender__in=[current_user, other_user], receiver__in=[current_user, other_user])
             
@@ -84,7 +146,7 @@ def friends(request):
         'searchForm': searchForm,
     }
     return render(request, "myapp/friends.html", context)
-
+"""
 @login_required
 def talk_room(request, pk):
     receiver = CustomUser.objects.get(id=pk)

@@ -50,22 +50,26 @@ def friends(request):
     else:
         searchForm = SearchForm() 
         other_users = CustomUser.objects.exclude(id=current_user.id)
-    users_chats_list = []  
     
+    
+    users_chats_list = []  
 
     latest_chats = (
         Chat.objects.filter(
             Q(sender=current_user) | Q(receiver=current_user)
         )
-        .values('sender', 'receiver')
+        .values('sender', 'receiver', 'id')
         .annotate(latest_time=Max('created_at'))  # 最新のチャット日時を取得
     )
 
     # 2. 最新チャットを辞書に整理してキャッシュ
     latest_chat_dict = {
-        (chat['sender'], chat['receiver']): chat['latest_time']
+        (chat['sender'], chat['receiver']): (chat['latest_time'], chat['id'])
         for chat in latest_chats
     }
+
+    chat_ids = [chat['id'] for chat in latest_chats]
+    chats_in_bulk = Chat.objects.in_bulk(chat_ids)
 
     # 3. 他のユーザーに対して、最新のチャットを取得
     for other_user in other_users:
@@ -73,26 +77,22 @@ def friends(request):
         reverse_key = (other_user.id, current_user.id)
 
         # 最新のチャットがあるか確認
-        latest_time = latest_chat_dict.get(chat_key) or latest_chat_dict.get(reverse_key)
-
-        if latest_time:
+        latest_time_id = latest_chat_dict.get(chat_key) or latest_chat_dict.get(reverse_key)
+        
+        if latest_time_id:
             # 最新チャットを取得
-            latest_chat = (
-                Chat.objects.filter(
-                    Q(sender=current_user, receiver=other_user) |
-                    Q(sender=other_user, receiver=current_user)
-                )
-                .latest('created_at')
-            )
+            latest_chat = chats_in_bulk.get(latest_time_id[1])
         else:
             # チャットがない場合の仮オブジェクト
-            latest_chat = Chat(
+        
+            latest_chat_model = Chat(
                 sender=current_user,
                 receiver=other_user,
                 created_at=None,
                 content="まだトークしていません"
             )
-
+            
+        
         # 4. ユーザーとチャットのペアをリストに追加
         user_chat_dict = {
             'user': other_user,

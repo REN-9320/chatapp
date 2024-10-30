@@ -7,25 +7,25 @@
 
 <form action='{% url "friends" %}' method="get" class="search_form">
     {{ searchForm }}
-    <button type="submit">検索</button>
+    <button type="submit" name="friends_search">検索</button>
     <a href='{% url "friends" %}'>クリア</a>
 </form>
 
-{% for dict in users_chats_list %}
-<a href="{% url 'talk_room' dict.user.pk %}">
+{% for friend in friends %}
+<a href="{% url 'talk_room' friend.id %}">
     <div class="friend-box">
     <div class="friend-icon">
-    {% if dict.user.image %}
-        <img src="{{dict.user.image.url}}" alt="">
+    {% if friend.image %}
+        <img src="{{friend.image.url}}" alt="">
     {% endif %}
         
     </div>
     <div class="friend-text">
-        <div class="friend-text-name">{{ dict.user.username }}</div>
+        <div class="friend-text-name">{{ friend.username }}</div>
         <div class="friend-text-chat">
-            <div class="friend-chat-content">{{ dict.chat.content }}</div>
-            {% if dict.chat.created_at != None %}
-            <div class="friend-chat-created_at">{{ dict.chat.created_at }}</div>
+            <div class="friend-chat-content">{{ friend.latest_msg_talk }}</div>
+            {% if friend.latest_msg_time != None %}
+            <div class="friend-chat-created_at">{{ friend.latest_msg_time }}</div>
             {% endif %}
         </div>
     </div>
